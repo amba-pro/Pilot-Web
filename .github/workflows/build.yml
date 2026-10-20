@@ -15,8 +15,28 @@ jobs:
       - run: npm install
       - run: npm test
       - run: npm run build
+      - name: Verify installation ZIP and prepare direct-download artifact
+        run: |
+          mkdir -p dist/installable/frontend
+          cp dist/frontend/* dist/installable/frontend/
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import json
+          with ZipFile("dist/balloon-pop-pilot-web.zip") as package:
+              names = set(package.namelist())
+              assert "frontend/extensions.config.json" in names, names
+              assert "frontend/balloon-pop.js" in names, names
+              manifest = json.loads(package.read("frontend/extensions.config.json"))
+              assert manifest["extension"]["entry"] == "balloon-pop.js"
+          assert Path("dist/installable/frontend/extensions.config.json").is_file()
+          assert Path("dist/installable/frontend/balloon-pop.js").is_file()
+          print("Validated frontend/ archive root and manifest")
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: balloon-pop-pilot-web
-          path: dist/balloon-pop-pilot-web.zip
+          # Downloaded artifact ZIP contains frontend/ at its root,
+          # so it can be uploaded straight to the Pilot-Web Web-extension UI.
+          name: balloon-pop-pilot-web-INSTALL
+          path: dist/installable/
           if-no-files-found: error
