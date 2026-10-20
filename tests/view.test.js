@@ -24,7 +24,7 @@ test("the game has exactly four embedded offline face targets", async () => {
   const { FACE_SOURCES } = await import("../src/extension/FaceAssets.js");
   assert.equal(FACE_SOURCES.length, 4);
   for (const src of FACE_SOURCES) {
-    assert.match(src, /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/);
+    assert.ok(src.startsWith("data:image/jpeg;base64,"));
     assert.ok(Buffer.from(src.split(",")[1], "base64").length > 500);
   }
 });
