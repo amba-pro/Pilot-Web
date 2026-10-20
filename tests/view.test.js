@@ -2,12 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { BalloonGameView } from "../src/extension/BalloonGameView.js";
+import { HEAD_SOURCES } from "../src/extension/HeadAssets.js";
 
-test("Pilot-Web manifest maps to exported IOpenspaceView", () => {
+test("Pilot-Web extension manifest maps to IOpenspaceView", () => {
   const manifest = JSON.parse(fs.readFileSync(new URL("../src/extension/extensions.config.json", import.meta.url)));
   assert.equal(manifest.extension.name, "balloon_pop_demo");
   assert.equal(manifest.extension.entry, "balloon-pop.js");
-  assert.equal(manifest.version, "1.3.0");
+  assert.equal(manifest.version, "1.4.0");
   assert.deepEqual(manifest.extension.modules, [{
     ngModuleName: "BalloonGameView",
     exposedInterface: "IOpenspaceView<PageContext>"
@@ -19,12 +20,21 @@ test("Pilot-Web manifest maps to exported IOpenspaceView", () => {
   view.dispose();
 });
 
-
-test("the game has exactly four embedded offline face targets", async () => {
-  const { FACE_SOURCES } = await import("../src/extension/FaceAssets.js");
-  assert.equal(FACE_SOURCES.length, 4);
-  for (const src of FACE_SOURCES) {
-    assert.ok(src.startsWith("data:image/jpeg;base64,"));
-    assert.ok(Buffer.from(src.split(",")[1], "base64").length > 500);
+test("seven NEW transparent-background offline head targets", () => {
+  assert.equal(HEAD_SOURCES.length, 7);
+  for (const src of HEAD_SOURCES) {
+    assert.ok(src.startsWith("data:image/webp;base64,"), "All images are embedded WebP");
+    const data = Buffer.from(src.split(",")[1], "base64");
+    assert.ok(data.length > 500, "Image must not be empty");
+    assert.equal(data.toString("ascii", 0, 4), "RIFF");
+    assert.equal(data.toString("ascii", 8, 12), "WEBP");
   }
+});
+
+test("game creates particle explosions and does not import old image assets", () => {
+  const js = fs.readFileSync(new URL("../src/extension/BalloonGameView.js", import.meta.url), "utf8");
+  assert.match(js, /const explode = \(element\) =>/);
+  assert.match(js, /explode\(b\.element\)/);
+  assert.match(js, /className = "particle"/);
+  assert.doesNotMatch(js, /FACE_SOURCES|FaceAssets/);
 });
