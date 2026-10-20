@@ -1,42 +1,67 @@
-# 🎈 Лопни шарик — тестовый плагин Pilot-Web
+# 🎈 Лопни шарик — тестовое веб-расширение Pilot-Web
 
-Это настоящее frontend-расширение Pilot-Web на JavaScript, собранное через Webpack Module Federation. Предназначено для проверки загрузки пользовательских расширений через Pilot-Web SDK. **Это не .NET-плагин для Pilot-BIM Desktop.**
+Игра для проверки загрузки **веб-расширений** Pilot-Web: Webpack Module Federation + `IOpenspaceView<PageContext>`. Это **не** клиентское .NET-расширение Pilot-BIM Desktop и **не** расширение Pilot-Server.
 
-В игровом пространстве шарики поднимаются вверх. Нажимайте на них мышкой, пальцем или клавиатурой: за каждое попадание даются очки, за серию — бонус. Есть таймер на 30 секунд, рекорд, пауза и повторная игра. Игра изолирована от интерфейса Pilot через Shadow DOM. К данным Pilot не обращается.
+Шарики поднимаются вверх. Нажимайте на них мышкой, пальцем или клавиатурой. За попадания начисляются очки, есть бонусы за серии, таймер 30 секунд, рекорд, пауза и рестарт. Игра не обращается к данным Pilot.
 
-## Быстро проверить игру
+## Скачать готовый установочный ZIP без разработки
+
+1. Откройте [GitHub Actions → Pilot-Web balloon plugin](https://github.com/amba-pro/Pilot-Web/actions/workflows/build.yml).
+2. Откройте **последний успешный** запуск сборки (`success`).
+3. Внизу, в разделе **Artifacts**, скачайте `balloon-pop-pilot-web-INSTALL`.
+4. **Не распаковывайте скачанный ZIP.** Теперь внешний архив Artifacts сам является установочным: в его корне лежит папка `frontend/`. Передавайте этот ZIP непосредственно Pilot-Web.
+
+**Внимание:** в старой сборке от 20.10.2026 Artifact `balloon-pop-pilot-web` содержал ещё один ZIP внутри. Он **не** подходил для загрузки без предварительной распаковки. Архив `pilot-web-balloon-source.zip` тоже не установочный — он содержит исходники.
+
+## Правильный тип при загрузке
+
+В интерфейсе Pilot-Web откройте:
+
+**Настройки → Модули расширения → Добавить → Веб-расширение** (второй пункт меню).
+
+НЕ выбирайте `Расширение` (первый пункт, для клиентских модулей) и НЕ выбирайте `Расширение Pilot-Server`.
+
+Выберите установочный ZIP, обновите Pilot-Web после завершения загрузки. Расположение игрового пространства зависит от версии и возможностей хоста.
+
+## Как проверить содержимое ZIP
+
+В корне архива должно находиться:
+
+```text
+frontend/
+  extensions.config.json
+  balloon-pop.js
+  ... дополнительные JS chunks
+```
+
+НЕ должно быть уровней `pilot-web-balloon/`, `dist/`, `balloon-pop-pilot-web.zip` или лишнего вложенного ZIP перед папкой `frontend`.
+
+Ошибка `500 NO_CONFIG_SOURCE_MESSAGE` означает сбой при обработке загружаемого архива; сначала проверьте тип расширения и структуру ZIP. Если оба верны, для дальнейшей диагностики нужны именно загруженный ZIP и журналы сервера.
+
+## Локальная разработка
 
 Нужен Node.js 20+.
 
 ```bash
+npm install
+npm test
 npm run preview
 ```
 
-Затем откройте **http://127.0.0.1:4173/preview/index.html**. Это только локальный предпросмотр, а не запущенный Pilot-Web-Server.
+Откройте http://127.0.0.1:4173/preview/index.html — это локальный предпросмотр игры, НЕ Pilot-Web-Server.
 
-## Сборка установочного ZIP
+Для сборки:
 
 ```bash
-npm install
-npm test
 npm run build
 ```
 
-Файл для установки: **dist/balloon-pop-pilot-web.zip**. В архиве находятся `frontend/extensions.config.json`, `frontend/balloon-pop.js` и chunk-файлы Webpack.
+Прямой установочный архив после локальной сборки: `dist/balloon-pop-pilot-web.zip`.
 
-В GitHub Actions workflow **Pilot-Web balloon plugin** также собирает ZIP и публикует его в Artifacts.
+## Документация SDK
 
-## Установка в Pilot-Web
+- [Настройка веб-расширений](https://pilot.ascon.ru/docssdk/pages/webserver/sborka/vue-nastroyka.html)
+- [Запуск TypeScript-расширения, структура ZIP и тип WebExtension](https://pilot.ascon.ru/docssdk/pages/webserver/sborka/ts-zapusk.html)
+- [Встраивание UI](https://pilot.ascon.ru/docssdk/pages/webserver/sborka/react-ui.html)
 
-1. Авторизуйтесь в рабочем Pilot-Web под пользователем с правами управления расширениями.
-2. Откройте **Настройки → Модули расширения → Добавить → Расширение**.
-3. Укажите файл `balloon-pop-pilot-web.zip`.
-4. Обновите страницу и найдите дополнительное пространство игры. Его расположение может зависеть от версии Pilot-Web.
-
-Загрузка файлов в GitHub **не устанавливает** расширение автоматически в Pilot-Web. Интеграцию с реальным сервером Pilot-Web нужно проверить отдельно.
-
-## SDK
-
-- [Официальная настройка web-расширений Pilot](https://pilot.ascon.ru/docssdk/pages/webserver/sborka/vue-nastroyka.html)
-- [Интерфейс IOpenspaceView и встраивание в UI](https://pilot.ascon.ru/docssdk/pages/webserver/sborka/react-ui.html)
-- [Загрузка ZIP-расширения](https://help.pilotems.com/ru/Content/web-plugin.htm)
+Интеграционный запуск на реальном Pilot-Web-Server пока не подтверждён.
