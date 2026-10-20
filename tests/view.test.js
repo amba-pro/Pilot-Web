@@ -8,7 +8,7 @@ test("Pilot-Web extension manifest maps to IOpenspaceView", () => {
   const manifest = JSON.parse(fs.readFileSync(new URL("../src/extension/extensions.config.json", import.meta.url)));
   assert.equal(manifest.extension.name, "balloon_pop_demo");
   assert.equal(manifest.extension.entry, "balloon-pop.js");
-  assert.equal(manifest.version, "1.4.0");
+  assert.equal(manifest.version, "1.5.0");
   assert.deepEqual(manifest.extension.modules, [{
     ngModuleName: "BalloonGameView",
     exposedInterface: "IOpenspaceView<PageContext>"
@@ -28,6 +28,8 @@ test("seven NEW transparent-background offline head targets", () => {
     assert.ok(data.length > 500, "Image must not be empty");
     assert.equal(data.toString("ascii", 0, 4), "RIFF");
     assert.equal(data.toString("ascii", 8, 12), "WEBP");
+    assert.equal(data.toString("ascii", 12, 16), "VP8X", "Must use extended WebP with alpha");
+    assert.ok((data[20] & 0x10) !== 0, "Transparent alpha channel must exist");
   }
 });
 
