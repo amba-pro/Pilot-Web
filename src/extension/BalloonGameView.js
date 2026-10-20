@@ -1,16 +1,12 @@
+import { FACE_SOURCES } from "./FaceAssets.js";
+
 import { createPilotLauncher } from "./PilotLauncher.js";
 
 /**
  * Pilot-Web SDK IOpenspaceView<PageContext>.
  * Standalone playground, does not access Pilot database or API.
  */
-const COLORS = [
-  ["#fd6482", "розовый"],
-  ["#febd47", "жёлтый"],
-  ["#796af0", "фиолетовый"],
-  ["#55d6b7", "зелёный"],
-  ["#51b9f3", "голубой"]
-];
+
 const STYLE = [
   ":host{display:block;height:100%;width:100%;font:500 15px/1.4 system-ui,sans-serif;color:#163052}",
   "*{box-sizing:border-box}button{font:inherit;cursor:pointer}",
@@ -21,8 +17,8 @@ const STYLE = [
   ".label{color:#8190a9;font-size:11px}.value{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums}",
   ".arena{position:relative;isolation:isolate;flex:1;min-height:320px;overflow:hidden;border-radius:22px;border:1px solid #95b7f3;background:radial-gradient(circle at 50% 95%,#c7efff 0%,transparent 47%),linear-gradient(170deg,#6688ed,#79b9f2 60%,#beeafa)}",
   ".arena:before{content:'';position:absolute;inset:0;z-index:-1;opacity:.2;background-image:radial-gradient(white 2px,transparent 2px);background-size:38px 38px}",
-  ".balloon{position:absolute;border:0;padding:0;border-radius:53% 53% 48% 48%;background:radial-gradient(ellipse at 30% 20%,#ffffffc9,transparent 30%),var(--color);box-shadow:inset -9px -9px 15px #0003,inset 5px 5px 10px #fff6,0 9px 15px #1e478c35;touch-action:manipulation}",
-  ".balloon:after{content:'';position:absolute;top:100%;left:50%;height:38px;border-left:2px solid #fffb;transform:rotate(10deg)}",
+  ".balloon{position:absolute;border:0;padding:0;border-radius:53% 53% 48% 48%;background:#edf0f8;box-shadow:0 9px 15px #1e478c35;overflow:hidden;touch-action:manipulation}",
+  ".balloon img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none;-webkit-user-drag:none}",
   ".balloon:focus-visible,.primary:focus-visible{outline:3px solid #ffdc83;outline-offset:4px}",
   ".popped{pointer-events:none;animation:pop .18s ease-out forwards}@keyframes pop{to{opacity:0;scale:1.5}}",
   ".modal{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:15px;background:#12386d77;backdrop-filter:blur(5px)}",
@@ -34,7 +30,7 @@ const STYLE = [
   ".secondary:disabled{opacity:.4;cursor:default}@media(max-width:580px){.stats{width:100%}.stat{flex:1;min-width:0;padding:6px}.root{padding:12px}.arena{min-height:300px}}",
   "@media(prefers-reduced-motion:reduce){.popped{animation:none;opacity:0}}"
 ].join("");
-const HTML = '<section class="root"><div class="head"><div><h1>🎈 Лопни шарик!</h1><p class="sub">Тестовое расширение Pilot-Web</p></div><div class="stats"><div class="stat"><span class="label">ОЧКИ</span><strong class="value" id="score">0</strong></div><div class="stat"><span class="label">ВРЕМЯ</span><strong class="value" id="time">30</strong></div><div class="stat"><span class="label">РЕКОРД</span><strong class="value" id="best">0</strong></div></div></div><div class="arena" id="arena"><div class="modal" id="modal"><div class="card"><div class="emoji" id="emoji">🎈</div><div class="title" id="title">Готов играть?</div><p class="copy" id="copy">Лопай шарики мышкой или пальцем. У тебя 30 секунд! За серию попаданий — бонус.</p><button type="button" class="primary" id="start">Начать игру</button></div></div></div><div class="footer"><span>🎯 Кликай по шарикам, пока они не улетели</span><button type="button" id="pause" class="secondary" disabled>Пауза</button></div></section>';
+const HTML = '<section class="root"><div class="head"><div><h1>🎈 Лопни шарик!</h1><p class="sub">Тестовое расширение Pilot-Web</p></div><div class="stats"><div class="stat"><span class="label">ОЧКИ</span><strong class="value" id="score">0</strong></div><div class="stat"><span class="label">ВРЕМЯ</span><strong class="value" id="time">30</strong></div><div class="stat"><span class="label">РЕКОРД</span><strong class="value" id="best">0</strong></div></div></div><div class="arena" id="arena"><div class="modal" id="modal"><div class="card"><div class="emoji" id="emoji">🎈</div><div class="title" id="title">Готов играть?</div><p class="copy" id="copy">Нажимай на лица мышкой или пальцем. У тебя 30 секунд! За серию попаданий — бонус.</p><button type="button" class="primary" id="start">Начать игру</button></div></div></div><div class="footer"><span>🎯 Кликай по лицам, пока они не улетели</span><button type="button" id="pause" class="secondary" disabled>Пауза</button></div></section>';
 const KEY = "pilot-web-balloon-pop-best-v1";
 
 function mount(container) {
@@ -104,20 +100,24 @@ function mount(container) {
   };
   const spawn = () => {
     if (balloons.size >= 8) return;
-    const size = 55 + Math.round(Math.random() * 35);
+    const size = 67 + Math.round(Math.random() * 44);
     const width = arena.clientWidth || 650;
     const x = 8 + Math.random() * Math.max(0, width - size - 16);
-    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const faceIndex = Math.floor(Math.random() * FACE_SOURCES.length);
     const id = ++lastId;
     const element = document.createElement("button");
     element.type = "button";
     element.className = "balloon";
-    element.setAttribute("aria-label", "Лопнуть " + color[1] + " шарик");
+    element.setAttribute("aria-label", "Нажать на фото лица " + (faceIndex + 1));
     element.style.width = size + "px";
-    element.style.height = Math.round(size * 1.17) + "px";
+    element.style.height = size + "px";
     element.style.left = x + "px";
     element.style.bottom = "-100px";
-    element.style.setProperty("--color", color[0]);
+    const picture = document.createElement("img");
+    picture.src = FACE_SOURCES[faceIndex];
+    picture.alt = "";
+    picture.draggable = false;
+    element.appendChild(picture);
     element.addEventListener("click", () => pop(id));
     arena.appendChild(element);
     balloons.set(id, { element, distance: 0, speed: 83 + Math.random() * 53, size });
