@@ -1,3 +1,5 @@
+import { createPilotLauncher } from "./PilotLauncher.js";
+
 /**
  * Pilot-Web SDK IOpenspaceView<PageContext>.
  * Standalone playground, does not access Pilot database or API.
@@ -200,7 +202,16 @@ function mount(container) {
 }
 
 export class BalloonGameView {
-  constructor() { this.element = undefined; this.destroy = undefined; }
+  constructor() {
+    this.element = undefined;
+    this.destroy = undefined;
+    // Pilot instantiates IOpenspaceView, but does not necessarily open getView().
+    // Install a reversible, isolated test launcher to make the demo discoverable.
+    this.removeLauncher = createPilotLauncher(
+      () => this.getView(),
+      () => this.resetGame()
+    );
+  }
   getViewId() { return "balloon-pop-demo-view"; }
   getView() {
     if (!this.element) {
@@ -210,9 +221,14 @@ export class BalloonGameView {
     }
     return this.element;
   }
-  dispose() {
+  resetGame() {
     if (this.destroy) this.destroy();
     this.destroy = undefined;
     this.element = undefined;
+  }
+  dispose() {
+    if (this.removeLauncher) this.removeLauncher();
+    this.removeLauncher = undefined;
+    this.resetGame();
   }
 }
