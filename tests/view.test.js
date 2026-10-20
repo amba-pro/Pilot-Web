@@ -7,7 +7,7 @@ test("Pilot-Web manifest maps to exported IOpenspaceView", () => {
   const manifest = JSON.parse(fs.readFileSync(new URL("../src/extension/extensions.config.json", import.meta.url)));
   assert.equal(manifest.extension.name, "balloon_pop_demo");
   assert.equal(manifest.extension.entry, "balloon-pop.js");
-  assert.equal(manifest.version, "1.1.0");
+  assert.equal(manifest.version, "1.2.0");
   assert.deepEqual(manifest.extension.modules, [{
     ngModuleName: "BalloonGameView",
     exposedInterface: "IOpenspaceView<PageContext>"

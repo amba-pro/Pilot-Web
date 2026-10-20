@@ -3,6 +3,8 @@
  * change the host navigation, or access user/project data.
  * This mounts only when Pilot instantiates the extension class.
  */
+import { installStartScreenTile } from "./StartScreenTile.js";
+
 const HOST_ID = "pilot-web-balloon-demo-launcher";
 const STYLE = `
 :host { display:contents; font: 500 14px system-ui, sans-serif; }
@@ -62,6 +64,7 @@ export function createPilotLauncher(getGameView, onCloseGame) {
   let destroyed = false;
   let host = null;
   let removeKeys = null;
+  let removeStartScreenTile = null;
   let closeGame = null;
   const setup = () => {
     if (destroyed || !document.body || document.getElementById(HOST_ID)) return;
@@ -88,7 +91,7 @@ export function createPilotLauncher(getGameView, onCloseGame) {
       open.focus();
     };
 
-    open.addEventListener("click", () => {
+    const showGame = () => {
       if (gameOpen) return;
       try {
         slot.appendChild(getGameView());
@@ -101,7 +104,9 @@ export function createPilotLauncher(getGameView, onCloseGame) {
         slot.replaceChildren();
         onCloseGame();
       }
-    });
+    };
+    open.addEventListener("click", showGame);
+    removeStartScreenTile = installStartScreenTile(showGame);
     close.addEventListener("click", () => closeGame());
 
     const onKey = (event) => {
@@ -125,6 +130,7 @@ export function createPilotLauncher(getGameView, onCloseGame) {
     destroyed = true;
     document.removeEventListener("DOMContentLoaded", setup);
     if (removeKeys) removeKeys();
+    if (removeStartScreenTile) removeStartScreenTile();
     if (closeGame && host && host.shadowRoot.getElementById("overlay").hidden === false) closeGame();
     if (host) host.remove();
     host = null;
