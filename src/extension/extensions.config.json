@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "author": "amba-pro",
+  "license": "MIT",
+  "title": "Лопни шарик — демонстрация Pilot-Web",
+  "version": "1.0.0",
+  "extension": {
+    "name": "balloon_pop_demo",
+    "entry": "balloon-pop.js",
+    "modules": [
+      {
+        "ngModuleName": "BalloonGameView",
+        "exposedInterface": "IOpenspaceView<PageContext>"
+      }
+    ]
+  }
+}

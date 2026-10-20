@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Лопни шарик — предпросмотр Pilot-Web</title>
+  <style>body{margin:0;padding:24px;background:#e8edf5;font-family:system-ui,sans-serif}.title{margin-bottom:12px;color:#687993;font-size:13px}.shell{height:calc(100vh - 100px);min-height:520px;max-width:1150px;margin:auto;border-radius:14px;overflow:hidden;border:1px solid #d7e0ef;background:white}@media(max-width:600px){body{padding:8px}.shell{height:calc(100vh - 50px)}}</style>
+</head>
+<body>
+  <div class="title">Локальный предпросмотр · без подключения к Pilot-Web-Server</div>
+  <div class="shell" id="app"></div>
+  <script type="module">
+    import { BalloonGameView } from "../src/extension/BalloonGameView.js";
+    const view = new BalloonGameView();
+    document.getElementById("app").appendChild(view.getView());
+    window.addEventListener("pagehide", () => view.dispose(), { once: true });
+  </script>
+</body>
+</html>
