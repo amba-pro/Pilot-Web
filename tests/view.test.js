@@ -8,7 +8,7 @@ test("Pilot-Web extension manifest maps to IOpenspaceView", () => {
   const manifest = JSON.parse(fs.readFileSync(new URL("../src/extension/extensions.config.json", import.meta.url)));
   assert.equal(manifest.extension.name, "balloon_pop_demo");
   assert.equal(manifest.extension.entry, "balloon-pop.js");
-  assert.equal(manifest.version, "1.6.0");
+  assert.equal(manifest.version, "1.7.0");
   assert.deepEqual(manifest.extension.modules, [{
     ngModuleName: "BalloonGameView",
     exposedInterface: "IOpenspaceView<PageContext>"
@@ -48,6 +48,13 @@ test("all moving heads have one circular 104px target size", () => {
   assert.match(source, /element\.style\.width = size \+ "px";/);
   assert.match(source, /element\.style\.height = size \+ "px";/);
   assert.match(source, /\.balloon\{[^"\n]*border-radius:50%/);
-  assert.match(source, /\.balloon img\{[^"\n]*object-fit:cover/);
+  assert.match(source, /\.balloon img\{[^"\n]*object-fit:contain/);
   assert.doesNotMatch(source, /Math\.round\(Math\.random\(\) \* 58\)/);
+});
+
+test("game targets use transparent circular hit boxes with no colored disk", () => {
+  const js = fs.readFileSync(new URL("../src/extension/BalloonGameView.js", import.meta.url), "utf8");
+  assert.match(js, /\.balloon\{[^"\n]*background:transparent/);
+  assert.match(js, /\.balloon img\{[^"\n]*object-fit:contain/);
+  assert.doesNotMatch(js, /radial-gradient\(circle at 28% 22%/);
 });
