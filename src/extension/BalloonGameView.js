@@ -6,6 +6,9 @@ import { createPilotLauncher } from "./PilotLauncher.js";
  * Faces replace the former balloons. Targets keep the same gameplay logic
  * and now burst into particles when clicked.
  */
+// All seven targets have exactly the same visible hit area.
+export const TARGET_DIAMETER = 104;
+
 const STYLE = [
   ":host{display:block;height:100%;width:100%;font:500 15px/1.4 system-ui,sans-serif;color:#163052}",
   "*{box-sizing:border-box}button{font:inherit;cursor:pointer}",
@@ -16,11 +19,11 @@ const STYLE = [
   ".label{color:#8190a9;font-size:11px}.value{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums}",
   ".arena{position:relative;isolation:isolate;flex:1;min-height:320px;overflow:hidden;border-radius:22px;border:1px solid #95b7f3;background:radial-gradient(circle at 50% 95%,#c7efff 0%,transparent 47%),linear-gradient(170deg,#6688ed,#79b9f2 60%,#beeafa)}",
   ".arena:before{content:'';position:absolute;inset:0;z-index:-1;opacity:.22;background-image:radial-gradient(white 2px,transparent 2px);background-size:38px 38px}",
-  ".balloon{position:absolute;border:0;padding:0;background:transparent;touch-action:manipulation;will-change:transform;filter:drop-shadow(0 10px 16px rgba(30,71,140,.22));transition:filter .16s ease,transform .16s ease}",
-  ".balloon:hover{filter:drop-shadow(0 14px 18px rgba(30,71,140,.27))}",
-  ".balloon img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none}",
+  ".balloon{position:absolute;display:block;box-sizing:border-box;border:2px solid rgba(255,255,255,.85);border-radius:50%;overflow:hidden;padding:0;background:radial-gradient(circle at 28% 22%,#fff 0%,#d4e7fa 85%);box-shadow:0 10px 18px rgba(30,71,140,.24);touch-action:manipulation;will-change:transform;transition:box-shadow .16s ease}",
+  ".balloon:hover{box-shadow:0 14px 22px rgba(30,71,140,.34)}",
+  ".balloon img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 25%;pointer-events:none;user-select:none;-webkit-user-drag:none}",
   ".balloon:focus-visible,.primary:focus-visible{outline:3px solid #ffdc83;outline-offset:4px}",
-  ".popped{pointer-events:none;animation:pop .16s ease-out forwards}@keyframes pop{to{opacity:0;transform:scale(.82)}}",
+  ".popped{pointer-events:none;animation:pop .16s ease-out forwards}@keyframes pop{to{opacity:0;filter:brightness(1.6)}}",
   ".modal{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:15px;background:#12386d77;backdrop-filter:blur(5px)}",
   ".modal[hidden]{display:none}.card{max-width:360px;padding:28px 24px;border-radius:24px;text-align:center;background:white;box-shadow:0 17px 40px #14386a55}",
   ".emoji{font-size:44px}.title{font-size:25px;font-weight:850;margin:6px 0}.copy{color:#6c7993;margin:9px 0 20px}",
@@ -159,7 +162,7 @@ function mount(container) {
 
   const spawn = () => {
     if (balloons.size >= 8) return;
-    const size = 76 + Math.round(Math.random() * 58);
+    const size = TARGET_DIAMETER;
     const width = arena.clientWidth || 650;
     const x = 8 + Math.random() * Math.max(0, width - size - 16);
     const id = ++lastId;
@@ -170,9 +173,9 @@ function mount(container) {
     element.className = "balloon";
     element.setAttribute("aria-label", "Лопнуть голову цели");
     element.style.width = size + "px";
-    element.style.height = Math.round(size * 1.12) + "px";
+    element.style.height = size + "px";
     element.style.left = x + "px";
-    element.style.bottom = "-120px";
+    element.style.bottom = "-" + (size + 16) + "px";
     element.style.transform = "translate3d(0,0,0) rotate(" + (-8 + Math.random() * 16) + "deg)";
 
     const img = document.createElement("img");

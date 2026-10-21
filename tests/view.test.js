@@ -1,14 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { BalloonGameView } from "../src/extension/BalloonGameView.js";
+import { BalloonGameView, TARGET_DIAMETER } from "../src/extension/BalloonGameView.js";
 import { HEAD_SOURCES } from "../src/extension/HeadAssets.js";
 
 test("Pilot-Web extension manifest maps to IOpenspaceView", () => {
   const manifest = JSON.parse(fs.readFileSync(new URL("../src/extension/extensions.config.json", import.meta.url)));
   assert.equal(manifest.extension.name, "balloon_pop_demo");
   assert.equal(manifest.extension.entry, "balloon-pop.js");
-  assert.equal(manifest.version, "1.5.0");
+  assert.equal(manifest.version, "1.6.0");
   assert.deepEqual(manifest.extension.modules, [{
     ngModuleName: "BalloonGameView",
     exposedInterface: "IOpenspaceView<PageContext>"
@@ -39,4 +39,15 @@ test("game creates particle explosions and does not import old image assets", ()
   assert.match(js, /explode\(b\.element\)/);
   assert.match(js, /className = "particle"/);
   assert.doesNotMatch(js, /FACE_SOURCES|FaceAssets/);
+});
+
+test("all moving heads have one circular 104px target size", () => {
+  assert.equal(TARGET_DIAMETER, 104);
+  const source = fs.readFileSync(new URL("../src/extension/BalloonGameView.js", import.meta.url), "utf8");
+  assert.match(source, /const size = TARGET_DIAMETER;/);
+  assert.match(source, /element\.style\.width = size \+ "px";/);
+  assert.match(source, /element\.style\.height = size \+ "px";/);
+  assert.match(source, /\.balloon\{[^"\n]*border-radius:50%/);
+  assert.match(source, /\.balloon img\{[^"\n]*object-fit:cover/);
+  assert.doesNotMatch(source, /Math\.round\(Math\.random\(\) \* 58\)/);
 });
