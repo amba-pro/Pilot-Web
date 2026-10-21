@@ -3,7 +3,7 @@
   "author": "amba-pro",
   "license": "MIT",
   "title": "Лопни шарик — демонстрация Pilot-Web",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "extension": {
     "name": "balloon_pop_demo",
     "entry": "balloon-pop.js",
