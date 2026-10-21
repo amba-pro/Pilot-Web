@@ -54,7 +54,7 @@ test("all moving heads have one circular 104px target size", () => {
 
 test("game targets use transparent circular hit boxes with no colored disk", () => {
   const js = fs.readFileSync(new URL("../src/extension/BalloonGameView.js", import.meta.url), "utf8");
-  assert.match(js, /\\.balloon\\{[^"\\n]*background:transparent/);
-  assert.match(js, /\\.balloon img\\{[^"\\n]*object-fit:contain/);
-  assert.doesNotMatch(js, /radial-gradient\\(circle at 28% 22%/);
+  assert.match(js, /\.balloon\{[^"\n]*background:transparent/);
+  assert.match(js, /\.balloon img\{[^"\n]*object-fit:contain/);
+  assert.doesNotMatch(js, /radial-gradient\(circle at 28% 22%/);
 });
